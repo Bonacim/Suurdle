@@ -1,0 +1,102 @@
+<ul class="list-group list-group-flush">
+    <% replies.forEach(function(reply){%>
+        <li class="list-group-item pr-0 list-group-item-light">
+            <div class="card-title">
+        <strong>
+            <% if (currentUser && currentUser.username === reply.author) { %>
+                <i class="color-orange fas fa-user"></i>
+            <% } else { %>
+                <i class="fas fa-user"></i>
+            <% } %>
+            <a href="/users/<%= reply.author %>"><%= reply.author %></a>
+        </strong>
+        <small>
+            <% if(moment(reply.createdAt).isSame(reply.updatedAt)) { %>
+                <%= moment(reply.createdAt).fromNow() %>
+            <% } else {%>
+                <%= moment(reply.updatedAt).fromNow() %> (edited)
+            <% }%>
+        </small>
+        <span class="float-right">
+            <% if(currentUser && (reply.author === currentUser.username || currentUser.isAdmin)){ %>
+                <a class="btn btn-sm btn-warning" role="button" data-toggle="collapse" href="#collapseEdit<%= reply._id %>" aria-expanded="false" aria-controls="collapse<%= reply._id %>">Edit</a>
+                <form class="delete-form" action="./<%= assignmentSlug %>/comments/<%=reply._id %>?_method=DELETE" method="POST">
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            <% } %>
+        </span>
+            </div>
+            <p class="card-text"><%= reply.text %></p>
+        
+            <div class="commentVoteView" id="commentVoteView<%= reply._id %>"> <%//Would need a lot of small AJAX calls to GET this view for every comment%>
+                <form action="./<%= assignmentSlug %>/comments/<%=reply._id%>/vote" method="POST">
+                    <%const userVote = currentUser ? reply.votes.find((vote) => vote.user === currentUser.username) : false%>
+                    <% if (userVote) { %>
+                        <% if (userVote.upvote) {%>
+                            <button type="submit" name="like" value="1" class="btn btn-sm btn-primary">
+                                <i class="fas fa-thumbs-up"></i> <%=reply.votes.filter(vote => vote.upvote).length%>
+                            </button>
+                            <button type="submit" name="like" value="0" class="btn btn-sm btn-outline-danger">
+                                <i class="far fa-thumbs-down"></i> <%=reply.votes.filter(vote => !vote.upvote).length%>
+                            </button>
+                        <% } else { %>
+                            <button type="submit" name="like" value="1" class="btn btn-sm btn-outline-primary">
+                                <i class="far fa-thumbs-up"></i> <%=reply.votes.filter(vote => vote.upvote).length%>
+                            </button>
+                            <button type="submit" name="like" value="0" class="btn btn-sm btn-danger">
+                                <i class="fas fa-thumbs-down"></i> <%=reply.votes.filter(vote => !vote.upvote).length%>
+                            </button>
+                        <% } %>
+                    <% } else { %>
+                        <button type="submit" name="like" value="1" class="btn btn-sm btn-outline-primary">
+                            <i class="far fa-thumbs-up"></i> <%=reply.votes.filter(vote => vote.upvote).length%>
+                        </button>
+                        <button type="submit" name="like" value="0" class="btn btn-sm btn-outline-danger">
+                            <i class="far fa-thumbs-down"></i> <%=reply.votes.filter(vote => !vote.upvote).length%>
+                        </button>
+                    <% } %>
+                    <a class="btn btn-sm btn-outline-success" role="button" data-toggle="collapse" href="#collapseReply<%= reply._id %>" aria-expanded="false" aria-controls="collapseReply<%= reply._id %>">Reply</a>
+                </form>
+            </div>
+        
+            <% if(currentUser && (reply.author === currentUser.username || currentUser.isAdmin)){ %>
+                <div class="card collapse edit-comment" id="collapseEdit<%= reply._id %>">
+                    <div class="card-body">
+                        <h4 class="card-title">Edit your reply <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></h4>
+                        <form id="edit-comment-form<%= reply._id %>" action="./<%= assignmentSlug %>/comments/<%= reply._id %>?_method=PUT" method="POST">
+                            <div class="form-group">
+                                <input class="form-control" type="text" disabled value="<%= reply.author %>">
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" name="comment[text]" placeholder="Your reply text..." form="edit-comment-form<%= reply._id %>" rows="5" required><%= reply.text %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-warning">Edit reply <span class="glyphicon glyphicon-comment" aria-hidden="true"></span></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            <% } %>
+            <div class="card collapse my-1 add-comment" id="collapseReply<%= reply._id %>">
+                <div class="card-body">
+                    <% if(currentUser){ %>
+                        <h4 class="card-title">Add your reply <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></h4>
+                        <form id="reply-comment-form<%= reply._id %>" action="./<%= assignmentSlug %>/comments/<%= reply._id %>/reply" method="POST">
+                            <div class="form-group">
+                                <input class="form-control" type="text" disabled value="<%= currentUser.username %>">
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" name="comment[text]" placeholder="Your reply text..." form="reply-comment-form<%= reply._id %>" rows="5" required>@<%=reply.author%> </textarea>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-success">Send reply  <span class="glyphicon glyphicon-comment" aria-hidden="true"></span></button>
+                            </div>
+                        </form>
+                    <% } else { %>
+                        <h5 class="card-text">You need to login before you can reply. <a href="/login">Click here</a> to go to the login page.</h5>
+                    <% } %>
+                </div>
+            </div>
+        </li>
+    <% }); %>
+</ul>

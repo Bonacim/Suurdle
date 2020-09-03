@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Make site responsive on mobile/tablet -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Suurdle</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <script src="https://kit.fontawesome.com/dee1401630.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="/stylesheets/main.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container">                
+                <a class="navbar-brand" href="/">Suurdle</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item <%= typeof page !== "undefined" && page === "domains" ? "active" : "" %>"><a class="nav-link" href="/domains">Home</a></li>
+                        <% if (typeof page !== "undefined" && typeof domain !== "undefined" && (page === "domain" || page === "subjects" || page === "subject" || page === "assignments" || page === "assignment")) {%>
+                            <li class="nav-item <%= typeof page !== "undefined" && page === "subjects" ? "active" : "" %>"><a class="nav-link" href="/domains/<%=domain.slug%>"><%=domain.name%></a></li>
+                        <% } %>
+                        <% if (typeof page !== "undefined" && typeof domain !== "undefined" && typeof subject !== "undefined" && (page === "subject" || page === "assignments" || page === "assignment")) {%>
+                            <li class="nav-item <%= typeof page !== "undefined" && page === "assignments" ? "active" : "" %>"><a class="nav-link" href="/domains/<%=domain.slug%>/subjects/<%=subject.slug%>"><%=subject.name%></a></li>
+                        <% } %>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <% if(!currentUser){ %>
+                            <li class="nav-item <%= typeof page !== "undefined" && page === "login" ? "active" : "" %>"><a class="nav-link" href="/login">Login</a></li>
+                            <li class="nav-item <%= typeof page !== "undefined" && page === "register" ? "active" : "" %>"><a class="nav-link" href="/register">Sign Up</a></li>
+                        <% } else { %>
+                            <li class="nav-item"><a class="nav-link" href="/contact">Contact Us</a></li>
+                            <li class="nav-item dropdown">
+                                <a id="navbarNotifications" class="nav-link dropdown-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications <span class="badge badge-secondary"><%= notifications.length %></span></a>
+                                <div class="dropdown-menu" aria-labelledby="navbarNotifications">
+                                    <a class="dropdown-item" href="/notifications">View past notifications</a>
+                                    <% notifications.forEach(function(notification) { %>   
+                                        <a class="dropdown-item" href="/notifications/<%= notification.id %>"><%= notification.username %> posted a new assignment</a>
+                                    <% }); %>
+                                </div>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="/users/<%= currentUser.username %>">Signed In As <%= currentUser.username %></a></li>
+                            <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div id="alertBox" class="container landing-front">            
+            <% if(error && error.length > 0){ %>
+                <div class="alert alert-danger" role="alert">
+                    <%= error %>
+                </div>
+            <% } %>
+            <% if(success && success.length > 0){ %>
+                <div class="alert alert-success" role="alert">
+                    <%= success %>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="container">
+    

@@ -1,0 +1,31 @@
+<%- include("../partials/header") %>
+
+<div class="row">
+    <div class="col-md-4">
+        <div>
+            <% if(user.avatar.url) {%>
+                <img class="card-img-top" src="<%=user.avatar.url%>" alt="user profile image" width="300" height="300">
+                <%} else {%>
+                    <img class="card-img-top" src="/images/user.png" alt="user profile image" width="300" height="300">
+                    <%}%>
+            <div class="card-body">
+                <h1 class="card-title"><%= user.firstName + " " + user.lastName %></h1>
+                <p class="card-text">Joined on <%= moment(user.createdAt).format("MMMM Do, YYYY") %></p>
+                <a href="/users/<%= user.username %>/follow"><button class="btn btn-primary">Follow <%= user.username %></button></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h3><%= user.username %>'s assignments:</h3>
+		<ul>
+		<% assignments.forEach(function(assignment) { %>
+			<li><a href="/assignments/<%= assignment.slug %>"><%= assignment.title %></a></li>
+		<% }); %>
+		</ul>
+    </div>
+</div>
+
+
+
+<%- include("../partials/scripts") %>
+<%- include("../partials/footer") %>

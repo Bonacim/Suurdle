@@ -1,0 +1,156 @@
+<%- include("../partials/header") %>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <% if(currentUser && (assignment.author === currentUser.username || currentUser.isAdmin)){ %>
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <h4>Your assignment</h4>
+                        </div>
+                        <div class="col">
+                            <span class="float-right">
+                                <a class="btn btn-sm btn-warning" href="./<%= assignment.slug %>/edit">Edit</a>
+                                <form class="delete-form" action="./<%= assignment.slug %>?_method=DELETE" method="POST">
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            <% }%>
+            <div class="card-body">
+                <h3 class="card-title"><%=assignment.title%></h3>
+                <p>
+                    <% if(moment(assignment.createdAt).isSame(assignment.updatedAt)) { %>
+                        <em>Submitted by <a href="/users/<%= assignment.author %>"><%= assignment.author %></a> on <%= moment(assignment.createdAt).format("h:mma MMMM Do, YYYY") %></em>
+                    <% } else {%>
+                        <em>Updated by <a href="/users/<%= assignment.author %>"><%= assignment.author %></a> on <%= moment(assignment.updatedAt).format("h:mma MMMM Do, YYYY") %></em>
+                    <% }%>
+                </p>
+                <hr>
+                <p class="card-text"><%= assignment.description %></p>
+                <div class="my-2">
+                    <% if(assignment.attachments.length > 0) {%>
+                        <span>Attachment</span>
+                        <ul class="list-group">
+                            <% assignment.attachments.forEach(attachment => { %>
+                                <li class="list-group-item"><a target="_blank" href="<%=attachment.url%>" rel="noopener noreferrer"><%=attachment.name.substring(attachment.name.indexOf(' ') + 1)%></a></li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <span>No attachments found</span>
+                    <% } %>
+                </div>
+                <div id="voteView">Loading votes<%//Ajax ./vote fills here%></div>                
+            </div>
+        </div>
+
+        <div id="commentSection" class="card my-2" >Loading comments<%//Ajax ./comments/ fills here%></div>
+    </div>
+</div>
+
+
+
+<%- include("../partials/scripts") %>
+<script  language="javascript" type="text/javascript">
+    $(document).ready( function() {
+        //Get voteView
+        $.ajax({
+            type: "GET",
+            url: window.location.pathname + "/vote",
+            success: function(data, textStatus, jqXHR ) {
+                ajaxSuccess(data,"#voteView");
+            },
+            error: function(jqXHR, exception) {                        
+                ajaxError(jqXHR, exception);
+            }
+        });
+        
+        //Get commentSection
+        $.ajax({
+            type: "GET",
+            url: window.location.pathname + "/comments/",
+            success: function(data, textStatus, jqXHR ) {
+                ajaxSuccess(data,"#commentSection");
+            },
+            error: function(jqXHR, exception) {                        
+                ajaxError(jqXHR, exception);
+            }
+        });
+    });
+
+    //Post voteView (works on dynamically created forms)
+    $(document).on("click","#voteView form button", function (evt){
+        evt.preventDefault();
+    
+        const url = $("#voteView form").attr("action");
+        const like = $(this).attr("value");
+    
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {like: like},                        
+            success: function(data, textStatus, jqXHR ) {
+                ajaxSuccess(data,"#voteView");
+            },
+            error: function(jqXHR, exception) {                        
+                ajaxError(jqXHR, exception);
+            }
+        });
+    
+    });
+
+    //Get commentReplies
+    $(document).on("click",".collapse-comment-replies", function (evt){
+        evt.preventDefault();
+
+        const id = $(this).attr("href").replace("#commentReplies","");
+        const commentReplies =  $("#commentReplies"+id);
+
+        if (commentReplies.hasClass("show")) {
+            commentReplies.collapse("hide");
+            return;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: window.location.pathname + "/comments/" + id,
+            success: function(data, textStatus, jqXHR ) {
+                ajaxSuccess(data,"#commentReplies"+id);
+            },
+            error: function(jqXHR, exception) {                        
+                ajaxError(jqXHR, exception);
+            },
+            complete: function() {
+                commentReplies.collapse("show");
+            }
+        });
+    
+    });
+
+    //Post commentVoteView (works on dynamically created forms)
+    $(document).on("click",".commentVoteView form button", function (evt){
+        evt.preventDefault();
+
+        const url = $(this).parent().attr("action");
+        const like = $(this).attr("value");
+        const id =  $(this).parent().parent().attr("id");
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {like: like},                        
+            success: function(data, textStatus, jqXHR ) {
+                ajaxSuccess(data,"#"+id);
+            },
+            error: function(jqXHR, exception) {                        
+                ajaxError(jqXHR, exception);
+            }
+        });
+    
+    });
+
+    
+</script>
+<%- include("../partials/footer") %>

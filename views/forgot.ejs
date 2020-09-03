@@ -1,0 +1,22 @@
+<%- include("./partials/header") %>
+
+<div class="row">
+	<div class="col-md-12">
+        <h1 class="text-center">Forgot password</h1>
+        <div>
+            <form action="/forgot" method="POST">            
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" name="email" autofocus class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <input type="submit" class="btn btn-primary" value="Reset Password">
+                </div>
+            </form>
+            <div><a href="javascript:history.back()">Go back</a></div>
+        </div>
+	</div>
+</div>
+
+<%- include("./partials/scripts") %>
+<%- include("./partials/footer") %>

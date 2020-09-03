@@ -1,0 +1,32 @@
+<%- include("../partials/header") %>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Create a new assignment</h1>
+        <div>
+            <form action="./" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input id="title" class="form-control" type="text" name="assignment[title]" placeholder="Assignment's title" required>
+                </div>
+                <div class="form-group">
+                    <label for="description"> Description </label>
+                    <textarea id="description" class="form-control" type="text" name="assignment[description]" rows="10" placeholder="Assignment's description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="attachments">Attachments</label>
+                    <input id="attachments" class="form-control h-100" type="file" name="assignment[attachments]" multiple>
+                    <small>10 MB limit</small>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block">Submit</button>
+                </div>
+            </form>
+            <a href="./">Go back</a>
+        </div>
+    </div>
+</div>
+
+<%- include("../partials/scripts") %>
+<%- include("../partials/footer") %>
+

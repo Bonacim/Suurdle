@@ -1,0 +1,39 @@
+.thumbnail img {
+    width: 100%;
+}
+
+.thumbnail {
+    padding: 0;
+}
+
+.thumbnail .caption-full {
+    padding: 9px;
+}
+
+.delete-form {
+    display: inline;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.add-comment {
+    border-left: 5px solid #00C851;
+}
+
+.edit-comment {
+    border-left: 5px solid #ffbb33; margin-top: 15px;
+}
+
+.color-gray {
+    color: gray;
+}
+
+.color-orange {
+    color: orange;
+}
+
+.color-blue {
+    color: blue;
+}

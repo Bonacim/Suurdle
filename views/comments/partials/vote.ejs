@@ -1,0 +1,31 @@
+<form action="./<%= assignmentSlug %>/comments/<%=comment._id%>/vote" method="POST">
+    <%const userVote = currentUser ? comment.votes.find((vote) => vote.user === currentUser.username) : false%>
+    <% if (userVote) { %>
+        <% if (userVote.upvote) {%>
+            <button type="submit" name="like" value="1" class="btn btn-sm btn-primary">
+                <i class="fas fa-thumbs-up"></i> <%=likes.length%>
+            </button>
+            <button type="submit" name="like" value="0" class="btn btn-sm btn-outline-danger">
+                <i class="far fa-thumbs-down"></i> <%=dislikes.length%>
+            </button>
+        <% } else { %>
+            <button type="submit" name="like" value="1" class="btn btn-sm btn-outline-primary">
+                <i class="far fa-thumbs-up"></i> <%=likes.length%>
+            </button>
+            <button type="submit" name="like" value="0" class="btn btn-sm btn-danger">
+                <i class="fas fa-thumbs-down"></i> <%=dislikes.length%>
+            </button>
+        <% } %>
+    <% } else { %>
+        <button type="submit" name="like" value="1" class="btn btn-sm btn-outline-primary">
+            <i class="far fa-thumbs-up"></i> <%=likes.length%>
+        </button>
+        <button type="submit" name="like" value="0" class="btn btn-sm btn-outline-danger">
+            <i class="far fa-thumbs-down"></i> <%=dislikes.length%>
+        </button>
+    <% } %>
+    <a class="btn btn-sm btn-outline-success shadow-none" role="button" data-toggle="collapse" href="#collapseReply<%= comment._id %>" aria-expanded="false" aria-controls="collapseReply<%= comment._id %>">Reply</a>
+    <% if (comment.modelName === "Assignment") {%>
+        <a class="btn btn-sm btn-outline-info shadow-none collapse-comment-replies" role="button" href="#commentReplies<%= comment._id %>" aria-expanded="false" aria-controls="commentReplies<%= comment._id %>">Replies</a>
+    <% } %>
+</form>

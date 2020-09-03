@@ -1,0 +1,42 @@
+<%- include("partials/header") %>
+    
+<link rel="stylesheet" href="/stylesheets/landing.css">
+<div id="landing-header">
+     <h1>Welcome to Suurdle!</h1>
+    <a href="/domains" class="btn btn-lg btn-success">Start Exploring</a>
+    <p>
+        <form action="/domains" method="GET" class="form-group">
+            <div class="form-row">
+                <div class="col-sm-10">
+                    <label class="sr-only" for="search">Search</label>
+                    <input id="search" type="text" name="search" placeholder="Domain search..." class="form-control">
+                </div>
+                <div class="col-sm-2">
+                    <input type="submit" value="Search" class="btn btn-block btn-primary">
+                </div>
+            </div>
+        </form>        
+        
+    </p>
+    <div>
+        <div class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign glyphicon-margin" aria-hidden="true"></span> This is and early build. We can't guarantee that your data won't be lost or exposed.</div>
+        <div class="alert alert-warning">
+            <p>The objective of this website is to help students in their assignments and studies by giving them references and a place to discuss.</p>
+            <p>All your assignments that you upload here will be considered free of your intellectual property.</p>
+            <p><strong>We do not support plagiarism.</strong></p>
+        </div>
+    </div>
+</div>
+
+
+
+<ul class="slideshow">
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+</ul>
+
+<%- include("partials/scripts") %>
+<%- include("partials/footer") %>

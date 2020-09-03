@@ -1,0 +1,33 @@
+{
+  "name": "suurdle",
+  "version": "0.0.1",
+  "description": "Suurdle 0.1",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Alexandre Nadolni Bonacim",
+  "license": "ISC",
+  "dependencies": {
+    "@sendgrid/mail": "^7.2.5",
+    "cloudinary": "^1.23.0",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^3.2.0",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-sanitizer": "^1.0.5",
+    "express-session": "^1.17.1",
+    "faker": "^5.1.0",
+    "method-override": "^3.0.0",
+    "moment": "^2.27.0",
+    "mongo-sanitize": "^1.1.0",
+    "mongoose": "^5.10.2",
+    "multer": "^1.4.2",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.0.1"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,18 @@
+<%- include("./partials/header") %> 
+
+<div class="row">
+    <div class="col-md-12">
+        <form action="/contact" method="POST">
+            <div class="form-group" >
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="10" placeholder="Your message" class="form-control" required ></textarea>                
+            </div>
+            <div>
+                <input type="submit" class="btn btn-primary">
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include("./partials/scripts") %>
+<%- include("./partials/footer") %>

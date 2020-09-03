@@ -1,0 +1,28 @@
+<%- include("../partials/header") %>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Create a new domain</h1>        
+        <h4 class="text-center">You won't be able to edit this information later</h1>
+        <div>
+            <form action="./" method="POST">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input id="name" class="form-control" type="text" name="domain[name]" placeholder="Domain's name" required>
+                </div>
+                <div class="form-group">
+                    <label for="referTo">Reference (Required to verify your domain)</label>
+                    <input id="referTo" class="form-control" type="text" name="domain[referTo]" placeholder="Domain's reference">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block">Submit</button>
+                </div>
+            </form>
+            <a href="./">Go back</a>
+        </div>
+    </div>
+</div>
+
+<%- include("../partials/scripts") %>
+<%- include("../partials/footer") %>
+

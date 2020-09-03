@@ -1,0 +1,23 @@
+<%- include("../partials/header") %>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Add new comment to <%= assignment.title %></h1>
+        <div>
+            <form action="./" method="POST">
+                <div class="form-group">
+                    <label for="text">Text</label>
+                    <textarea id="text" class="form-control" name="comment[text]" placeholder="Write your comment" rows="5" required></textarea>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block">Submit!</button>
+                </div>
+            </form>
+            <a href="../">Go back</a>
+        </div>
+    </div>
+</div>
+
+<%- include("../partials/scripts") %>
+<%- include("../partials/footer") %>
+

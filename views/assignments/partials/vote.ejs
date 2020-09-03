@@ -1,0 +1,88 @@
+<form action="./<%= assignment.slug %>/vote" method="POST">
+    <%const userVote = currentUser ? assignment.votes.find((vote) => vote.user === currentUser.username) : false%>
+    <% if (userVote) { %>
+        <% if (userVote.upvote) {%>
+            <button type="submit" name="like" value="1" class="btn btn-sm btn-primary">
+                <i class="fas fa-thumbs-up"></i> Liked (<%=likes.length%>)
+            </button>
+            <button type="submit" name="like" value="0" class="btn btn-sm btn-outline-danger">
+                <i class="far fa-thumbs-down"></i> Dislike (<%=dislikes.length%>)
+            </button>
+        <% } else { %>
+            <button type="submit" name="like" value="1" class="btn btn-sm btn-outline-primary">
+                <i class="far fa-thumbs-up"></i> Like (<%=likes.length%>)
+            </button>
+            <button type="submit" name="like" value="0" class="btn btn-sm btn-danger">
+                <i class="fas fa-thumbs-down"></i> Disliked (<%=dislikes.length%>)
+            </button>
+        <% } %>
+    <% } else { %>
+        <button type="submit" name="like" value="1" class="btn btn-sm btn-outline-primary">
+            <i class="far fa-thumbs-up"></i> Like (<%=likes.length%>)
+        </button>
+        <button type="submit" name="like" value="0" class="btn btn-sm btn-outline-danger">
+            <i class="far fa-thumbs-down"></i> Dislike (<%=dislikes.length%>)
+        </button>
+    <% } %>
+    <span type="button" class="btn btn-sm btn-outline-info" data-toggle="modal"
+            data-target="#assignmentLikes">See more details
+    </span>
+</form> 
+
+<div id="assignmentLikes" class="modal fade" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Assignment score: <%= assignment.score %></h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Liked by:</th>
+                        <th>Disliked by:</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <% const max = likes.length > dislikes.length ? likes.length : dislikes.length; %>
+                        <% let noLikesPrinted = false; %>
+                        <% let noDislikesPrinted = false; %>
+                        <% for (let i = 0; i < max; i++) { %>
+                            <tr>
+                                <% if (i < likes.length) {%>
+                                    <td><span class="badge"><i class="fas fa-user"></i> <a href="/users/<%= likes[i].user %>"><%= likes[i].user %></a></td>
+                                <% } else if (likes.length === 0 && !noLikesPrinted) {%>
+                                    <% noLikesPrinted = true; %>
+                                    <td><em>No likes yet.</em></td>
+                                <% } else { %>
+                                    <td></td>
+                                <% } %>
+
+                                <% if (i < dislikes.length) {%>
+                                    <td><span class="badge"><i class="fas fa-user"></i> <a href="/users/<%= dislikes[i].user %>"><%= dislikes[i].user %></a></td>
+                                <% } else if (dislikes.length === 0 && !noDislikesPrinted) {%>
+                                    <% noDislikesPrinted = true; %>
+                                    <td><em>No dislikes yet.</em></td>
+                                <% } else { %>
+                                    <td></td>
+                                <% } %>
+                            </tr>
+                        <% } %>
+                        <% if (max === 0) {%>
+                            <tr>
+                                <td><em>No likes yet.</em></td>
+                            </tr>
+                            <tr>
+                                <td><em>No dislikes yet.</em></td>
+                            </tr>
+                        <%}%>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

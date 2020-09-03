@@ -1,0 +1,41 @@
+<%- include("../partials/header") %>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Edit <%= assignment.title %></h1>
+        <div>
+            <form action="../<%= assignment.slug %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input id="title" class="form-control" type="text" name="assignment[title]" placeholder="Assignment's title" value="<%= assignment.title %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="description"> Description </label>
+                    <textarea id="description" class="form-control" type="text" name="assignment[description]" rows="10" placeholder="Assignment's description"><%= assignment.description %></textarea>
+                </div>
+                <div class="form-group">
+                    <p>Remove assignments</p>
+                    <% assignment.attachments.forEach((attachment,i) => { %>
+                        <div>
+                            <input type="hidden" name="remove[<%=i%>]" value="0">
+                            <input type="checkbox" name="remove[<%=i%>]" value="1">
+                            <label for="remove[<%=i%>]"><a target="_blank" href="<%=attachment.url%>" rel="noopener noreferrer"><%=attachment.name%></a></label>
+                        </div>
+                    <% }); %>
+                </div>
+                <div class="form-group">
+                    <label for="attachments">Upload attachments</label>
+                    <input id="attachments" class="form-control h-100" type="file" name="assignment[attachments]" multiple>    
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block">Submit</button>
+                </div>
+            </form>
+            <a href="./">Go back</a>
+        </div>
+    </div>
+</div>
+
+<%- include("../partials/scripts") %>
+<%- include("../partials/footer") %>
+
