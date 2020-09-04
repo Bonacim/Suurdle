@@ -11,6 +11,7 @@ const assignmentSchema = new mongoose.Schema({
     description: String, //Description
     author: {
         type: String,
+        ref: "User",
         required: "Assignment author cannot be blank."
     }, //Author (User who created the Asignment)
     subject: {

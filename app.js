@@ -69,7 +69,7 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY, 
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
+//#TODO: apply select on querys
 app.use(async function(req, res, next){
     //Set user
     res.locals.currentUser = req.user;

@@ -33,12 +33,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: "Last name cannot be blank."
     }, //Last Name
-    notifications: [
-    	{
-    	    type: mongoose.Schema.Types.ObjectId,
-    	    ref: "Notification"
-    	}
-    ], //Notifications (Notifications for the User)
     followers: [
     	{
     		type: mongoose.Schema.Types.ObjectId,
@@ -86,6 +80,13 @@ userSchema.virtual('votes', {
     justOne: false
 });
 
+userSchema.virtual('notifications', {
+    ref: 'Notification', 
+    localField: 'username', 
+    foreignField: 'receiver',
+    justOne: false
+});
+
 //Plugin for authentication
 userSchema.plugin(passportLocalMongoose);
 
@@ -108,7 +109,7 @@ userSchema.pre("remove", async function(next){
             await cloudinary.v2.uploader.destroy(this.avatar.id);
         }
 
-        const populated = await this.populate("votes assignments").execPopulate();
+        const populated = await this.populate("votes assignments notifications").execPopulate();
 
         //Remove all votes on assignments made by the user
         const removeVotes = populated.votes;
@@ -126,6 +127,12 @@ userSchema.pre("remove", async function(next){
         const removeComments = await Comment.find({"author": this.username});//Gets all comments and replies in one query
         for (const removeComment of removeComments) {            
             await removeComment.remove();
+        }
+
+        //Remove all notifications for the user
+        const removeNotifications = populated.notifications;
+        for (const removeNotification of removeNotifications) {            
+            await removeNotification.remove();
         }
 
     } catch (err) {

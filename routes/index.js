@@ -392,7 +392,7 @@ router.get("/notifications", sanitizer, isLoggedIn, async function(req, res) {
         //Find user by id and populate
         const foundUser = await User.findById(req.user._id).populate({
             path: "notifications",
-            options: { sort: { "_id": "desc" } }
+            options: { sort: { "createdAt": "desc" } }
         }).exec();
         if (!foundUser){
             //Handle null result
@@ -422,16 +422,8 @@ router.get("/notifications/:notificationId", sanitizer, isLoggedIn, async functi
             return res.redirect("back");
         }
 
-        //Find user by id
-        const currentUser = await User.findById(req.user._id).exec();        
-        if (!currentUser){
-            //Handle null result
-            req.flash("error", "User not found");
-            return res.redirect("back");
-        }
-
         //Check if user has notification
-        if (!currentUser.notifications.includes(foundNotification._id)) {
+        if (req.user.username !== foundNotification.receiver) {
             //Handle user trying to access someone else's notification
             req.flash("error", "Notification not found"); //User should not know that this id exists
             console.error("User with no access to notification");
@@ -439,7 +431,7 @@ router.get("/notifications/:notificationId", sanitizer, isLoggedIn, async functi
         }
 
         //Find the assignment
-        const foundAssignment = await Assignment.findById(foundNotification.assignmentId).exec();
+        const foundAssignment = await Assignment.findById(foundNotification.assignmentId).populate({path:"subject", populate: "domain"}).exec();
         if (!foundAssignment) {
             //Handle null result
             req.flash("error", "Assignment not found");
@@ -452,7 +444,7 @@ router.get("/notifications/:notificationId", sanitizer, isLoggedIn, async functi
             await foundNotification.save();
         }
         //Go to notification's assignment
-        return res.redirect(`/assignments/${foundAssignment.slug}`);
+        return res.redirect(`/domains/${foundAssignment.subject.domain.slug}/subjects/${foundAssignment.subject.slug}/assignments/${foundAssignment.slug}`);
     } catch(err) {
         //Handle error
         req.flash("error", "Something went wrong");

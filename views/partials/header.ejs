@@ -36,7 +36,7 @@
                                 <div class="dropdown-menu" aria-labelledby="navbarNotifications">
                                     <a class="dropdown-item" href="/notifications">View past notifications</a>
                                     <% notifications.forEach(function(notification) { %>   
-                                        <a class="dropdown-item" href="/notifications/<%= notification.id %>"><%= notification.username %> posted a new assignment</a>
+                                        <a class="dropdown-item" href="/notifications/<%= notification.id %>"><%= notification.sender %> posted a new assignment</a>
                                     <% }); %>
                                 </div>
                             </li>

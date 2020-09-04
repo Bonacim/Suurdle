@@ -1,19 +1,25 @@
 const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
-	username: {
+	sender: {
         type: String,
-        required: "Notification must have a triggering user."
-    }, //Username (Who the notification is about, not the receiver)
+        ref: "User",
+        required: "Notification must have a sending user."
+    }, //Sender (User who generated the notification)
+    receiver: {
+        type: String,
+        ref: "User",
+        required: "Notification must have a receiving user."
+    }, //Receiver (User who the notification is for)
 	assignmentId: {
-        type: String,
+        type: mongoose.Types.ObjectId,
+        ref: "Assignment",
         required: "Notification must have a triggering event."
     }, //AssignmentId (Which assignment the notification is about)
 	isRead: { type: Boolean, default: false } //IsRead (Has the receiver read?)
 }, {
     timestamps: { type: Date, default: Date.now} //createdAt and updatedAt fields
 });
-//#TODO: use ref on User:Notification (1:N) and Assigment:Notification (1:N)
 //#TODO: assignmentId as ObjectId
 //#TODO: notifications for other actions
 

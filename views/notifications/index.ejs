@@ -6,7 +6,7 @@
 	<% allNotifications.forEach(function(notification) { %>
 	<li>
 		<a href="/notifications/<%= notification._id %>">
-			<%= notification.username %> posted a new assignment %>
+			<%= notification.sender %> posted a new assignment %>
 		</a>
 	</li>
 	<% }); %>

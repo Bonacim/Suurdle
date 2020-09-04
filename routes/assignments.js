@@ -201,16 +201,16 @@ router.post("/", sanitizer, isLoggedIn, multerAll.array("assignment[attachments]
 
         //Create notification
         const newNotification = {
-            username: req.user.username,
+            sender: req.user.username,
             assignmentId: createdAssignment.id
         }
         //#TODO: should use background job or sockets, not very scalable this way
         //#TODO: need to check https://pusher.com/tutorials/realtime-notifications-nodejs for realtime
         //Add notification to all followers
         for(const follower of currentUser.followers) {
-            const createdNotification = await Notification.create(newNotification);
-            follower.notifications.push(createdNotification);
-            follower.save({timestamps: false});
+            const notification = newNotification;
+            notification.receiver = follower.username;
+            Notification.create(notification);
         }
         //Redirect back to assignment page
         return res.redirect(`./assignments/${createdAssignment.slug}`);
