@@ -40,20 +40,27 @@ const nSubjects = {
 }
 
 const nAssignments = {
-    min: 10,
-    max: 30,
+    min: 5,
+    max: 10,
     current: 0,
     newCurrent: function() {this.current = this.min + Math.random()*(this.max-this.min);}
 }
 const nComments = {
-    min: 1,
+    min: 0,
     max: 3,
+    current: 0,
+    newCurrent: function() {this.current = this.min + Math.random()*(this.max-this.min);}
+}
+
+const nReplies = {
+    min: 0,
+    max: 2,
     current: 0,
     newCurrent: function() {this.current = this.min + Math.random()*(this.max-this.min);}
 }
 const nVotes = {
     min: 0,
-    max: nUsers.current,
+    max: nUsers.current/3,
     current: 0,
     newCurrent: function() {this.current = this.min + Math.random()*(this.max-this.min);}
 }
@@ -118,26 +125,8 @@ async function seedDB(){
             });
         }
 
-        //Generate list of subjects
-        let subjects = [];
-        nSubjects.newCurrent();
-        for (let i = 0; i < nSubjects.current; i++) {
-            subjects.push({
-                name: faker.lorem.words()
-            });
-        }
-
-        //Generate list of assignments
-        let assignments = [];
-        nAssignments.newCurrent();
-        for (let i = 0; i < nAssignments.current; i++) {
-            assignments.push({
-                title: faker.lorem.sentence(),
-                description: faker.lorem.paragraphs(Math.random()*10)
-            });
-        }
-
         //Remove all users
+        console.log("Removing all users");
         const removeUsers = await User.find({});
         for (const user of removeUsers) {
             await user.remove();
@@ -145,6 +134,7 @@ async function seedDB(){
         console.log("Removed all users");
 
         //Remove all domains
+        console.log("Removing all domains");
         const removeDomains = await Domain.find({});
         for (const domain of removeDomains) {
             await domain.remove();
@@ -152,6 +142,7 @@ async function seedDB(){
         console.log("Removed all domains");
 
         //Remove all subjects
+        console.log("Removing all subjects");
         const removeSubjects = await Subject.find({});
         for (const subject of removeSubjects) {
             await subject.remove();
@@ -159,6 +150,7 @@ async function seedDB(){
         console.log("Removed all subjects");
 
         //Remove all assignments
+        console.log("Removing all assignments");
         const removeAssignments = await Assignment.find({});
         for (const assignment of removeAssignments) {
             await assignment.remove();
@@ -166,6 +158,7 @@ async function seedDB(){
         console.log("Removed all assignments");
 
         //Remove all comments
+        console.log("Removing all comments");
         const removeComments = await Comment.find({});
         for (const comment of removeComments) {
             await comment.remove();
@@ -173,13 +166,15 @@ async function seedDB(){
         console.log("Removed all comments");
 
         //Remove all notifications
+        console.log("Removing all notifications");
         const removeNotifications = await Notification.find({});
         for (const notification of removeNotifications) {
             await notification.remove();
         }
         console.log("Removed all notifications");
 
-        //Remove all notifications
+        //Remove all votes
+        console.log("Removing all votes");
         const removeVotes = await Vote.find({});
         for (const vote of removeVotes) {
             await vote.remove();
@@ -217,150 +212,160 @@ async function seedDB(){
         }
         console.log(`Added ${createdDomains.length} domains`);  
 
-        //Set remaining subjects fields
-        for (let i = 0; i < subjects.length; i++) {
-            //Set a random author from users
-            const rndUser = Math.floor(Math.random()*createdUsers.length);
-            const rndDomain = Math.floor(Math.random()*createdDomains.length);
-            subjects[i].creator = createdUsers[rndUser];
-            subjects[i].domain = createdDomains[rndDomain]._id;
-        }
-        
-        console.log(`Adding ${subjects.length} subjects`);
-        const createdSubjects = await Subject.create(subjects);
-        if (createdSubjects.length != subjects.length) {
-            //Handle not all subjects created
-            console.log("Failed to create all subjects");
-            return;
-        }
-        console.log(`Added ${createdSubjects.length} subjects`);  
-
-        //#TODO: create assignments per subject
-
-        //Set remaining assignments fields
-        for (let i = 0; i < assignments.length; i++) {
-            //Set a random author from users
-            const rndUser = Math.floor(Math.random()*createdUsers.length);
-            const rndSubject = Math.floor(Math.random()*createdSubjects.length);
-            assignments[i].author = createdUsers[rndUser].username;
-            assignments[i].subject = createdSubjects[rndSubject]._id;
-        }
-        //Add assignments
-        console.log(`Adding ${assignments.length} assignments`);
-        const createdAssignments = await Assignment.create(assignments);
-        if (createdAssignments.length != assignments.length){
-            //Handle not all assignments created
-            console.log("Failed to create all assignments");
-            return;
-        }        
-        console.log(`Added ${createdAssignments.length} assignments`);
-
-        for (const [i, assignmentCreated] of createdAssignments.entries()) {
-            //Add votes
-            let assignmentVotes = [];
-            const rnd = Math.floor(Math.random()*createdUsers.length);
-            nVotes.newCurrent();
-            for (let i = 0; i < nVotes.current && rnd+i < createdUsers.length; i++) {                
-                assignmentVotes.push({user: createdUsers[rnd+i].username, upvote: (Math.random() > 0.5), modelId: assignmentCreated._id, modelName: "Assignment"});
-            }
-            console.log(`Adding ${assignmentVotes.length} votes to assignment (${i+1} of ${createdAssignments.length})`);
-            const createdAssignmentVotes = await Vote.create(assignmentVotes);
-            if (createdAssignmentVotes.length != assignmentVotes.length){
-                //Handle not all votes created
-                console.log("Failed to create all votes");
-                return;
-            } 
-            console.log(`Added ${assignmentVotes.length} votes to assignment (${i+1} of ${createdAssignments.length})`);
-            assignmentCreated.score = assignmentVotes.filter(vote => vote.upvote).length - assignmentVotes.filter(vote => !vote.upvote).length;
-            assignmentCreated.save({timestamps: false});
-
-            //Add comments
-            let comments = [];
-            nComments.newCurrent();
-            for (let i = 0; i < nComments.current; i++) {
-                const rnd = Math.floor(Math.random()*createdUsers.length);
-                comments.push({
-                    text: faker.lorem.sentence(),
-                    author: createdUsers[rnd].username,
-                    modelId: assignmentCreated._id,
-                    modelName: "Assignment"
+        for (const [i, domainCreated] of createdDomains.entries()) {
+            //Generate list of subjects
+            let subjects = [];
+            nSubjects.newCurrent();
+            for (let i = 0; i < nSubjects.current; i++) {
+                const rndUser = Math.floor(Math.random()*createdUsers.length);
+                subjects.push({
+                    name: faker.lorem.words(),
+                    creator: createdUsers[rndUser]._id,
+                    domain: domainCreated._id
                 });
             }
 
-            console.log(`Adding ${comments.length} comments to assignment (${i+1} of ${createdAssignments.length})`);
-            const createdComments = await Comment.create(comments);
-            if (createdComments.length != comments.length){
-                //Handle not all comments created
-                console.log("Failed to create all comments");
+            console.log(`Adding ${subjects.length} subjects to domain (${i+1} of ${createdDomains.length})`);
+            const createdSubjects = await Subject.create(subjects);
+            if (createdSubjects.length != subjects.length) {
+                //Handle not all subjects created
+                console.log("Failed to create all subjects");
                 return;
             }
+            console.log(`Added ${createdSubjects.length} subjects to domain (${i+1} of ${createdDomains.length})`);
 
-            
-            
-            for (const [i, commentCreated] of createdComments.entries()) {
-                //Add votes
-                let commentVotes = [];
-                const rnd = Math.floor(Math.random()*createdUsers.length);
-                nVotes.newCurrent();
-                for (let i = 0; i < nVotes.current && rnd+i < createdUsers.length; i++) {                
-                    commentVotes.push({user: createdUsers[rnd+i].username, upvote: (Math.random() > 0.5), modelId: commentCreated._id, modelName: "Comment"});
-                }
-                console.log(`Adding ${commentVotes.length} votes to comment (${i+1} of ${createdComments.length})`);
-                const createdCommentVotes = await Vote.create(commentVotes);
-                if (createdCommentVotes.length != commentVotes.length){
-                    //Handle not all votes created
-                    console.log("Failed to create all votes");
-                    return;
-                } 
-                console.log(`Added ${commentVotes.length} votes to comment (${i+1} of ${createdComments.length})`);
-                commentCreated.score = commentVotes.filter(vote => vote.upvote).length - commentVotes.filter(vote => !vote.upvote).length;
-                commentCreated.save({timestamps: false});
-                
-                //Add replies
-                let replies = [];
-                nComments.newCurrent();
-                for (let i = 0; i < nComments.current/2; i++) {
-                    const rnd = Math.floor(Math.random()*createdUsers.length);
-                    replies.push({
-                        text: faker.lorem.sentence(),
-                        author: createdUsers[rnd].username,
-                        modelId: commentCreated._id,
-                        modelName: "Comment"
+            for (const [i, subjectCreated] of createdSubjects.entries()) {
+                //Generate list of assignments
+                let assignments = [];
+                nAssignments.newCurrent();
+                for (let i = 0; i < nAssignments.current; i++) {
+                    const rndUser = Math.floor(Math.random()*createdUsers.length);
+                    assignments.push({
+                        title: faker.lorem.sentence(),
+                        description: faker.lorem.paragraphs(Math.random()*10),
+                        author: createdUsers[rndUser].username,
+                        subject: subjectCreated._id
                     });
                 }
                 
-                console.log(`Adding ${replies.length} replies to comment (${i+1} of ${createdComments.length})`);
-                const createdReplies = await Comment.create(replies);
-                if (createdReplies.length != replies.length){
-                    //Handle not all replies created
-                    console.log("Failed to create all replies");
+                //Add assignments
+                console.log(`Adding ${assignments.length} assignments`);
+                const createdAssignments = await Assignment.create(assignments);
+                if (createdAssignments.length != assignments.length){
+                    //Handle not all assignments created
+                    console.log("Failed to create all assignments");
                     return;
-                }
-                console.log(`Added ${createdReplies.length} replies to comment (${i+1} of ${createdComments.length})`);
-
-                for (const [i, replyCreated] of createdReplies.entries()) {
+                }        
+                console.log(`Added ${createdAssignments.length} assignments`);
+        
+                for (const [i, assignmentCreated] of createdAssignments.entries()) {
                     //Add votes
-                    let replyVotes = [];
+                    let assignmentVotes = [];
                     const rnd = Math.floor(Math.random()*createdUsers.length);
                     nVotes.newCurrent();
                     for (let i = 0; i < nVotes.current && rnd+i < createdUsers.length; i++) {                
-                        replyVotes.push({user: createdUsers[rnd+i].username, upvote: (Math.random() > 0.5), modelId: replyCreated._id, modelName: "Comment"});
+                        assignmentVotes.push({user: createdUsers[rnd+i].username, upvote: (Math.random() > 0.5), modelId: assignmentCreated._id, modelName: "Assignment"});
                     }
-                    console.log(`Adding ${replyVotes.length} votes to reply (${i+1} of ${createdReplies.length})`);
-                    const createdReplyVotes = await Vote.create(replyVotes);
-                    if (createdReplyVotes.length != replyVotes.length){
+                    console.log(`Adding ${assignmentVotes.length} votes to assignment (${i+1} of ${createdAssignments.length})`);
+                    const createdAssignmentVotes = await Vote.create(assignmentVotes);
+                    if (createdAssignmentVotes.length != assignmentVotes.length){
                         //Handle not all votes created
                         console.log("Failed to create all votes");
                         return;
                     } 
-                    console.log(`Added ${replyVotes.length} votes to reply (${i+1} of ${createdReplies.length})`);
-                    replyCreated.score = replyVotes.filter(vote => vote.upvote).length - replyVotes.filter(vote => !vote.upvote).length;
-                    replyCreated.save({timestamps: false});
+                    console.log(`Added ${assignmentVotes.length} votes to assignment (${i+1} of ${createdAssignments.length})`);
+                    assignmentCreated.score = assignmentVotes.filter(vote => vote.upvote).length - assignmentVotes.filter(vote => !vote.upvote).length;
+                    assignmentCreated.save({timestamps: false});
+        
+                    //Add comments
+                    let comments = [];
+                    nComments.newCurrent();
+                    for (let i = 0; i < nComments.current; i++) {
+                        const rnd = Math.floor(Math.random()*createdUsers.length);
+                        comments.push({
+                            text: faker.lorem.sentence(),
+                            author: createdUsers[rnd].username,
+                            modelId: assignmentCreated._id,
+                            modelName: "Assignment"
+                        });
+                    }
+        
+                    console.log(`Adding ${comments.length} comments to assignment (${i+1} of ${createdAssignments.length})`);
+                    const createdComments = await Comment.create(comments);
+                    if (createdComments.length != comments.length){
+                        //Handle not all comments created
+                        console.log("Failed to create all comments");
+                        return;
+                    }
+        
+                    
+                    
+                    for (const [i, commentCreated] of createdComments.entries()) {
+                        //Add votes
+                        let commentVotes = [];
+                        const rnd = Math.floor(Math.random()*createdUsers.length);
+                        nVotes.newCurrent();
+                        for (let i = 0; i < nVotes.current && rnd+i < createdUsers.length; i++) {                
+                            commentVotes.push({user: createdUsers[rnd+i].username, upvote: (Math.random() > 0.5), modelId: commentCreated._id, modelName: "Comment"});
+                        }
+                        console.log(`Adding ${commentVotes.length} votes to comment (${i+1} of ${createdComments.length})`);
+                        const createdCommentVotes = await Vote.create(commentVotes);
+                        if (createdCommentVotes.length != commentVotes.length){
+                            //Handle not all votes created
+                            console.log("Failed to create all votes");
+                            return;
+                        } 
+                        console.log(`Added ${commentVotes.length} votes to comment (${i+1} of ${createdComments.length})`);
+                        commentCreated.score = commentVotes.filter(vote => vote.upvote).length - commentVotes.filter(vote => !vote.upvote).length;
+                        commentCreated.save({timestamps: false});
+                        
+                        //Add replies
+                        let replies = [];
+                        nReplies.newCurrent();
+                        for (let i = 0; i < nReplies.current; i++) {
+                            const rnd = Math.floor(Math.random()*createdUsers.length);
+                            replies.push({
+                                text: faker.lorem.sentence(),
+                                author: createdUsers[rnd].username,
+                                modelId: commentCreated._id,
+                                modelName: "Comment"
+                            });
+                        }
+                        
+                        console.log(`Adding ${replies.length} replies to comment (${i+1} of ${createdComments.length})`);
+                        const createdReplies = await Comment.create(replies);
+                        if (createdReplies.length != replies.length){
+                            //Handle not all replies created
+                            console.log("Failed to create all replies");
+                            return;
+                        }
+                        console.log(`Added ${createdReplies.length} replies to comment (${i+1} of ${createdComments.length})`);
+        
+                        for (const [i, replyCreated] of createdReplies.entries()) {
+                            //Add votes
+                            let replyVotes = [];
+                            const rnd = Math.floor(Math.random()*createdUsers.length);
+                            nVotes.newCurrent();
+                            for (let i = 0; i < nVotes.current && rnd+i < createdUsers.length; i++) {                
+                                replyVotes.push({user: createdUsers[rnd+i].username, upvote: (Math.random() > 0.5), modelId: replyCreated._id, modelName: "Comment"});
+                            }
+                            console.log(`Adding ${replyVotes.length} votes to reply (${i+1} of ${createdReplies.length})`);
+                            const createdReplyVotes = await Vote.create(replyVotes);
+                            if (createdReplyVotes.length != replyVotes.length){
+                                //Handle not all votes created
+                                console.log("Failed to create all votes");
+                                return;
+                            } 
+                            console.log(`Added ${replyVotes.length} votes to reply (${i+1} of ${createdReplies.length})`);
+                            replyCreated.score = replyVotes.filter(vote => vote.upvote).length - replyVotes.filter(vote => !vote.upvote).length;
+                            replyCreated.save({timestamps: false});
+                        }
+        
+                    }
+        
+                    console.log(`Added ${createdComments.length} comments to assignment (${i+1} of ${createdAssignments.length})`);
                 }
-
             }
-
-            console.log(`Added ${createdComments.length} comments to assignment (${i+1} of ${createdAssignments.length})`);
         }
     } catch (err) {
         //Handle error
