@@ -8,7 +8,6 @@ const Notification = require("../models/notification");
 const cloudinary = require("cloudinary");
 const Vote = require("../models/vote");
 const mongoose = require("mongoose");
-const { find } = require("async");
 
 //#TODO: change method for uploading/deleting attachments, currently slowing down page load. Possible solutions: 1) Ajax requests, only submit form after upload/delete completion. 2) Turn attachments into a collection and handle save,modify and delete hooks. 3)Refactor async/await
 //#TODO: Add tag functionality (add, remove, search for)

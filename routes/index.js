@@ -119,17 +119,22 @@ router.post("/register", sanitizer, multerImages.single("avatar"), async functio
 
 //LOGIN - show form to login
 router.get("/login", sanitizer, async function(req, res){
-     try {
-         if (req.session.redirectTo) {
-             //Remove the redirectTo after user has switched page, save value in buffer
-             req.session.loginRedirectTo = req.session.redirectTo;
-             delete req.session.redirectTo;
-         } else {
-             //Delete buffer
-             delete req.session.loginRedirectTo;
-         }
-     
-         return res.render("login", {page: "login", session: req.session});         
+    try {
+        //Redirects the user if already logged in
+        if(req.isAuthenticated()) {
+            return res.redirect("back");
+        }
+
+        if (req.session.redirectTo) {
+            //Remove the redirectTo after user has switched page, save value in buffer
+            req.session.loginRedirectTo = req.session.redirectTo;
+            delete req.session.redirectTo;
+        } else {
+            //Save the previous URL as redirect
+            req.session.loginRedirectTo = req.headers.referer;
+        }
+    
+        return res.render("login", {page: "login"});
     } catch (err) {
         //Handle error
         req.flash("error", "Something went wrong");
@@ -141,6 +146,7 @@ router.get("/login", sanitizer, async function(req, res){
 //LOGIN - handle login logic
 router.post("/login", sanitizer, async function(req, res, next) {
     try {
+        
         //Authenticate user
         passport.authenticate("local", function(err, user, info) {
             if (err) {throw err;}//Let outside catch handle
@@ -156,7 +162,7 @@ router.post("/login", sanitizer, async function(req, res, next) {
                 if (err) {throw err;}//Let outside catch handle
 
                 //Redirect
-                const loginRedirectTo = req.session.loginRedirectTo ? req.session.loginRedirectTo : "/";
+                const loginRedirectTo = req.session.loginRedirectTo ? req.session.loginRedirectTo : "back";
                 delete req.session.loginRedirectTo;
                 return res.redirect(loginRedirectTo);
             });
