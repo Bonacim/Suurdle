@@ -21,7 +21,8 @@ const indexRoutes = require("./routes/index");
 const url = process.env.DATABASEURL || "mongodb://localhost:27017/suurdle";
 mongoose.connect(url, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
 }).then(()=>console.log("Connected to DB!")
 ).catch((err)=>console.error(err));
 mongoose.set("useCreateIndex", true);

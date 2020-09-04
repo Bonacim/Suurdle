@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Assignment = require("./assignment");
+const User = require("./user");
 
 const notificationSchema = new mongoose.Schema({
 	sender: {
@@ -23,5 +25,6 @@ const notificationSchema = new mongoose.Schema({
 //#TODO: assignmentId as ObjectId
 //#TODO: notifications for other actions
 
+const Notification = mongoose.model("Notification", notificationSchema);
 
-module.exports = mongoose.model("Notification", notificationSchema);
+module.exports = Notification;

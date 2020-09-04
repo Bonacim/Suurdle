@@ -1,8 +1,12 @@
-const mongoose = require("mongoose");
- 
+const mongoose = require("mongoose"); 
+const Comment = require("./comment");
+const Assignment = require("./assignment");
+const User = require("./user");
+
 const voteSchema = new mongoose.Schema({
     user: {
         type: String,
+        ref: "User",
         required: "Voting user cannot be blank."
     }, //Author (User who created the Comment)
     modelId: {

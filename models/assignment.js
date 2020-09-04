@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary");
+const Comment = require("./comment");
+const User = require("./user");
+const Vote = require("./vote");
+const Subject = require("./subject");
+const Notification = require("./notification");
+const Follow = require("./follow");
 
-mongoose.set("useFindAndModify", false);
 
 const assignmentSchema = new mongoose.Schema({
     title: {
@@ -63,6 +68,13 @@ assignmentSchema.virtual('comments', {
     match: {modelName: "Assignment"}
 });
 
+assignmentSchema.virtual('notifications', {
+    ref: 'Notification', 
+    localField: '_id',
+    foreignField: 'assignmentId', 
+    justOne: false
+});
+
 //Add a slug before the assignment gets saved to the database
 assignmentSchema.pre("save", async function (next) {
     try {
@@ -87,7 +99,7 @@ assignmentSchema.pre("remove", async function(next) {
                 await cloudinary.v2.uploader.destroy(attachment.id);
             }
         }
-        const populated = await this.populate("comments votes").execPopulate();
+        const populated = await this.populate("comments votes notifications").execPopulate();
         
         //Remove comments on assignment
         const removeComments = populated.comments;
@@ -99,6 +111,12 @@ assignmentSchema.pre("remove", async function(next) {
         const removeVotes = populated.votes;
         for (const removeVote of removeVotes) {
             await removeVote.remove();
+        }
+
+        //Remove all notifications
+        const removeNotifications = populated.notifications;
+        for (const removeNotification of removeNotifications) {
+            await removeNotification.remove();
         }
         
     } catch (err) {

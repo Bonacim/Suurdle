@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
- 
+const Assignment = require("./assignment");
+const User = require("./user");
+const Vote = require("./vote");
+
 const commentSchema = new mongoose.Schema({
     text: {
         type: String,
@@ -7,6 +10,7 @@ const commentSchema = new mongoose.Schema({
     }, //Text
     author: {
         type: String,
+        ref: "User",
         required: "Comment author cannot be blank."
     }, //Author (User who created the Comment)
     modelId: {
@@ -47,7 +51,6 @@ commentSchema.virtual('votes', {
     match: {modelName: "Comment"}
 });
 
-const Vote = require("./vote");
 commentSchema.pre("remove", async function(next) {
     try {
         //Populate fields

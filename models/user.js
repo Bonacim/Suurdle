@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose  = require("passport-local-mongoose");
 const cloudinary = require("cloudinary");
+const Comment = require("./comment");
+const Assignment = require("./assignment");
+const Vote = require("./vote");
+const Notification = require("./notification");
+const Follow = require("./follow");
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -33,19 +38,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: "Last name cannot be blank."
     }, //Last Name
-    followers: [
-    	{
-    		type: mongoose.Schema.Types.ObjectId,
-    		ref: "User"
-    	}
-    ], //Followers (Users following User)
     isAdmin: {type: Boolean, default: false} //IsAdmin (Is User an Admin?)
 }, {
     timestamps: { type: Date, default: Date.now} //createdAt and updatedAt fields
 });
 //#TODO: add point system to user
-//#TODO: make followers/following virtual
-//#TODO: notifications, undreadNotification and countUnreadNotification as virtuals
 
 userSchema.set('toObject', { virtuals: true });
 userSchema.set('toJSON', { virtuals: true });
@@ -87,6 +84,22 @@ userSchema.virtual('notifications', {
     justOne: false
 });
 
+userSchema.virtual('followers', {
+    ref: 'Follow', 
+    localField: 'username', 
+    foreignField: 'followed',
+    justOne: false,
+    options: {select: "follower -followed"}
+});
+
+userSchema.virtual('following', {
+    ref: 'Follow', 
+    localField: 'username', 
+    foreignField: 'follower',
+    justOne: false,
+    options: {select: "followed -follower"}
+});
+
 //Plugin for authentication
 userSchema.plugin(passportLocalMongoose);
 
@@ -99,9 +112,6 @@ userSchema.post("save", function(err, doc, next) {
     return next(err);
 });
 
-const Vote = require("./vote")
-const Assignment = require("./assignment");
-const Comment = require("./comment");
 userSchema.pre("remove", async function(next){
     try {
         //Delete custom avatar
@@ -109,7 +119,7 @@ userSchema.pre("remove", async function(next){
             await cloudinary.v2.uploader.destroy(this.avatar.id);
         }
 
-        const populated = await this.populate("votes assignments notifications").execPopulate();
+        const populated = await this.populate("votes assignments notifications followers following").execPopulate();
 
         //Remove all votes on assignments made by the user
         const removeVotes = populated.votes;
@@ -135,6 +145,17 @@ userSchema.pre("remove", async function(next){
             await removeNotification.remove();
         }
 
+        //Remove all follow relationships
+        const removeFollowings = populated.following;
+        for (const removeFollowing of removeFollowings) {            
+            await removeFollowing.remove();
+        }
+        
+        const removeFollowers = populated.followers;
+        for (const removeFollower of removeFollowers) {            
+            await removeFollower.remove();
+        }
+
     } catch (err) {
         //Handle error
         console.error(err);
@@ -142,4 +163,6 @@ userSchema.pre("remove", async function(next){
     }
 });
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;

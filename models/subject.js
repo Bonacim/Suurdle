@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
- 
+const Assignment = require("./assignment");
+const User = require("./user");
+const Domain = require("./domain");
+
 const subjectSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -7,6 +10,7 @@ const subjectSchema = new mongoose.Schema({
     }, //Name
     creator: {
         type: mongoose.Types.ObjectId,
+        ref: "User",
         required: "Subject creator cannot be blank."
     }, //Creator (User who created the Subject) 
     domain: {

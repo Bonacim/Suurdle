@@ -8,6 +8,7 @@ const Notification = require("../models/notification");
 const Assignment = require("../models/assignment");
 const cloudinary = require("cloudinary");
 const sgMail = require('@sendgrid/mail'); //#TODO: domain authentication, Outlook blocks email by sendgrid without authentication, Gmail works fine
+const Follow = require("../models/follow");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 //#TODO: allow user to edit profile (name, avatar and email)
@@ -125,11 +126,12 @@ router.get("/login", sanitizer, async function(req, res){
             return res.redirect("back");
         }
 
+        const url = req.protocol + '://' + req.get('host') + req.originalUrl;
         if (req.session.redirectTo) {
             //Remove the redirectTo after user has switched page, save value in buffer
             req.session.loginRedirectTo = req.session.redirectTo;
             delete req.session.redirectTo;
-        } else {
+        } else if (req.headers.referer != url){
             //Save the previous URL as redirect
             req.session.loginRedirectTo = req.headers.referer;
         }
@@ -329,7 +331,7 @@ router.post("/reset/:token", sanitizer, async function(req, res) {
 router.get("/users/:userName", sanitizer, async function(req, res) {
     try {
         //Find user by username
-        const foundUser = await User.findOne({username: req.params.userName}).populate("followers assignments").exec();
+        const foundUser = await User.findOne({username: req.params.userName}).populate("followers following assignments").exec();
         if (!foundUser){
             //Handle null result
             req.flash("error", "User not found");
@@ -350,7 +352,11 @@ router.get("/users/:userName", sanitizer, async function(req, res) {
 router.get("/users/:userName/follow", sanitizer, isLoggedIn, async function(req, res) {
     try {
         //Find user by username
-        const foundUser = await User.findOne({username: req.params.userName}).exec();
+        const foundUser = await User.findOne({username: req.params.userName}).populate({
+            path: "followers",
+            match: {follower: req.user.username},
+            options: {limit: 1}
+        }).exec();
         if (!foundUser){
             //Handle null result
             req.flash("error", "User not found");
@@ -364,16 +370,22 @@ router.get("/users/:userName/follow", sanitizer, isLoggedIn, async function(req,
         }
 
         if (!foundUser.followers) {
-            //Create field
-            foundUser.followers = [];
-        } else if (foundUser.followers.includes(req.user._id)) {
+            //Handle null result
+            req.flash("error", "Failed to retrieve followers");
+            return res.redirect("back");
+        }
+        if (foundUser.followers.length !== 0 && foundUser.followers[0].follower === req.user.username) {
             //Handle user trying to follow someone he already follows
             req.flash("error", "You already follow this user");
             return res.redirect("back");
         }
 
+        const newFollow = {
+            follower: req.user.username,
+            followed: foundUser.username
+        }
         //Push current user to found user's followers
-        foundUser.followers.push(req.user._id);
+        await Follow.create(newFollow);
         //Update user
         await foundUser.save({timestamps: false});
         req.flash("success", "You have successfully followed " + foundUser.username + "!");

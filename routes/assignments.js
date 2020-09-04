@@ -198,7 +198,7 @@ router.post("/", sanitizer, isLoggedIn, multerAll.array("assignment[attachments]
             req.flash("error", "User not found");
             return res.redirect("back");
         }
-
+        
         //Create notification
         const newNotification = {
             sender: req.user.username,
@@ -207,9 +207,9 @@ router.post("/", sanitizer, isLoggedIn, multerAll.array("assignment[attachments]
         //#TODO: should use background job or sockets, not very scalable this way
         //#TODO: need to check https://pusher.com/tutorials/realtime-notifications-nodejs for realtime
         //Add notification to all followers
-        for(const follower of currentUser.followers) {
+        for(const follow of currentUser.followers) {
             const notification = newNotification;
-            notification.receiver = follower.username;
+            notification.receiver = follow.follower;
             Notification.create(notification);
         }
         //Redirect back to assignment page
